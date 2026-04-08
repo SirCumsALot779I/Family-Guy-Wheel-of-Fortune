@@ -80,11 +80,10 @@ function playTickSound(): void {
     tickSound.play();
 }
 
-function spinWheel(): void {
+function spinWheel(totalSpinSteps: number): void {
     const segmentCount = getSegmentCount();
     if (segmentCount < 2) return;
 
-    const totalSpinSteps = Math.floor(Math.random() * MAX_SPIN_STEPS) + 1;
     const stepAngle: number = 360 / segmentCount;
     let completedSteps: number = 0;
 
@@ -103,11 +102,35 @@ function spinWheel(): void {
         }
 
         const progress: number = completedSteps / totalSpinSteps;
-        const delay: number = SPIN_START_DELAY + (SPIN_END_DELAY - SPIN_START_DELAY) * (progress ** 2);
+        const delay: number =
+            SPIN_START_DELAY + (SPIN_END_DELAY - SPIN_START_DELAY) * (progress ** 2);
+
         setTimeout(performSpinStep, delay);
     }
 
     performSpinStep();
+}
+
+(window as any).getRandomNumber = getRandomNumber;
+(window as any).generateWheel = generateWheel;
+(window as any).resetWheelRotation = resetWheelRotation;
+
+async function getRandomNumber(): Promise<void> {
+    try {
+        const response = await fetch("/api/random");
+
+        if (!response.ok) {
+            throw new Error("Server response not ok.");
+        }
+
+        const data: { ranNum: number } = await response.json();
+
+        console.log("Number from se server:", data.ranNum);
+
+        spinWheel(data.ranNum);
+    } catch (error) {
+        console.error("error whilst getting random value:", error);
+    }
 }
 
 function resetWheelRotation(): void {

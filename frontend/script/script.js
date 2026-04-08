@@ -63,11 +63,10 @@ function playTickSound() {
     const tickSound = tickSoundTemplate.cloneNode(true);
     tickSound.play();
 }
-function spinWheel() {
+function spinWheel(totalSpinSteps) {
     const segmentCount = getSegmentCount();
     if (segmentCount < 2)
         return;
-    const totalSpinSteps = Math.floor(Math.random() * MAX_SPIN_STEPS) + 1;
     const stepAngle = 360 / segmentCount;
     let completedSteps = 0;
     function performSpinStep() {
@@ -86,6 +85,23 @@ function spinWheel() {
         setTimeout(performSpinStep, delay);
     }
     performSpinStep();
+}
+window.getRandomNumber = getRandomNumber;
+window.generateWheel = generateWheel;
+window.resetWheelRotation = resetWheelRotation;
+async function getRandomNumber() {
+    try {
+        const response = await fetch("/api/random");
+        if (!response.ok) {
+            throw new Error("Server response not ok.");
+        }
+        const data = await response.json();
+        console.log("Number from se server:", data.ranNum);
+        spinWheel(data.ranNum);
+    }
+    catch (error) {
+        console.error("error whilst getting random value:", error);
+    }
 }
 function resetWheelRotation() {
     currentRotation = 0;
