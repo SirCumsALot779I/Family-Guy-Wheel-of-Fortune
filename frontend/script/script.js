@@ -1,20 +1,33 @@
 "use strict";
 const wheelElement = document.getElementById("wheel");
-const segmentCountInput = document.getElementById("eckenInput");
 const tickSoundTemplate = document.getElementById("tickSound");
+const input = document.getElementById("nameInput");
+const addBtn = document.getElementById("addBtn");
+const list = document.getElementById("nameList");
+const errorHint = document.getElementById("errorHint");
+const emptyHint = document.getElementById("emptyHint");
 let currentRotation = 0;
 let lastTickRotation = 0;
 const WHEEL_CENTER = { x: 150, y: 150 };
 const WHEEL_RADIUS = 100;
 const FULL_CIRCLE_RADIANS = Math.PI * 2;
-const MAX_SPIN_STEPS = 960;
 const SPIN_START_DELAY = 5;
 const SPIN_END_DELAY = 75;
+const MIN_ITEMS = 2;
+const SEGMENT_COLORS = [
+    "#f4d87e",
+    "#f4a96b",
+    "#f4a0a0",
+    "#a8d8f0",
+    "#c5b8f0"
+];
+function getNames() {
+    return Array.from(list.querySelectorAll(".name-text"))
+        .map((element) => element.textContent?.trim() || "")
+        .filter((name) => name.length > 0);
+}
 function getSegmentCount() {
-    if (!segmentCountInput)
-        return 0;
-    const value = parseInt(segmentCountInput.value, 10);
-    return Number.isNaN(value) ? 0 : value;
+    return getNames().length;
 }
 function clearWheel() {
     if (!wheelElement)
@@ -27,7 +40,7 @@ function getPointOnCircle(center, radius, angleRadians) {
         y: center.y + radius * Math.sin(angleRadians - Math.PI / 2),
     };
 }
-function createWheelSegmentPath(segmentIndex, segmentCount) {
+function createWheelSegmentPath(segmentIndex, segmentCount, color) {
     const angleStep = FULL_CIRCLE_RADIANS / segmentCount;
     const startAngle = segmentIndex * angleStep;
     const endAngle = (segmentIndex + 1) * angleStep;
@@ -36,16 +49,16 @@ function createWheelSegmentPath(segmentIndex, segmentCount) {
     const largeArcFlag = angleStep > Math.PI ? 1 : 0;
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("d", `M ${WHEEL_CENTER.x} ${WHEEL_CENTER.y} L ${startPoint.x} ${startPoint.y} A ${WHEEL_RADIUS} ${WHEEL_RADIUS} 0 ${largeArcFlag} 1 ${endPoint.x} ${endPoint.y} Z`);
-    path.setAttribute("fill", `hsl(${(segmentIndex * 360) / segmentCount}, 100%, 50%)`);
+    path.setAttribute("fill", color);
+    path.setAttribute("stroke", "black");
+    path.setAttribute("stroke-width", "1");
     return path;
 }
 function generateWheel() {
-    const segmentCount = getSegmentCount();
+    const names = getNames();
+    const segmentCount = names.length;
     if (segmentCount < 2 || !wheelElement)
         return;
-    if (segmentCount === 8) {
-        window.open("https://www.instagram.com/reel/CwxOa6ruvJE/", "_blank");
-    }
     clearWheel();
     for (let index = 0; index < segmentCount; index += 1) {
         const segmentPath = createWheelSegmentPath(index, segmentCount);
@@ -123,12 +136,6 @@ function resetWheelRotation() {
     lastTickRotation = 0;
     updateWheelRotation();
 }
-const MIN_ITEMS = 2;
-const input = document.getElementById("nameInput");
-const addBtn = document.getElementById("addBtn");
-const list = document.getElementById("nameList");
-const errorHint = document.getElementById("errorHint");
-const emptyHint = document.getElementById("emptyHint");
 function getItemCount() {
     return list.querySelectorAll(".name-item").length;
 }
@@ -151,7 +158,7 @@ function showError() {
 function handleRemove(item) {
     if (getItemCount() <= MIN_ITEMS) {
         item.classList.remove("shake");
-        void item.offsetWidth; // reflow
+        void item.offsetWidth;
         item.classList.add("shake");
         item.addEventListener("animationend", () => item.classList.remove("shake"), { once: true });
         showError();
@@ -185,7 +192,6 @@ function addName(rawName) {
     input.value = "";
     input.focus();
 }
-// Bootstrap existing items
 list.querySelectorAll(".name-item").forEach((item) => {
     const btn = item.querySelector(".btn-remove");
     if (btn)

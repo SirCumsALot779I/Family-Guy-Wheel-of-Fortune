@@ -3,9 +3,13 @@ interface Point {
     y: number;
 }
 
-const wheelElement = document.getElementById("wheel") as HTMLElement | null;
-const segmentCountInput = document.getElementById("eckenInput") as HTMLInputElement | null;
+const wheelElement = document.getElementById("wheel") as SVGGElement | null;
 const tickSoundTemplate = document.getElementById("tickSound") as HTMLAudioElement | null;
+const input = document.getElementById("nameInput") as HTMLInputElement;
+const addBtn = document.getElementById("addBtn") as HTMLButtonElement;
+const list = document.getElementById("nameList") as HTMLUListElement;
+const errorHint = document.getElementById("errorHint") as HTMLParagraphElement;
+const emptyHint = document.getElementById("emptyHint") as HTMLParagraphElement;
 
 let currentRotation: number = 0;
 let lastTickRotation: number = 0;
@@ -13,15 +17,30 @@ let lastTickRotation: number = 0;
 const WHEEL_CENTER: Point = { x: 150, y: 150 };
 const WHEEL_RADIUS: number = 100;
 const FULL_CIRCLE_RADIANS: number = Math.PI * 2;
-const MAX_SPIN_STEPS: number = 960;
 const SPIN_START_DELAY: number = 5;
 const SPIN_END_DELAY: number = 75;
 
-function getSegmentCount(): number {
-    if (!segmentCountInput) return 0;
-    const value = parseInt(segmentCountInput.value, 10);
-    return Number.isNaN(value) ? 0 : value;
+const MIN_ITEMS: number = 2;
+
+const SEGMENT_COLORS: string[] = [ // aus css entfernt und hier eingefügt
+    "#f4d87e",
+    "#f4a96b",
+    "#f4a0a0",
+    "#a8d8f0",
+    "#c5b8f0"
+];
+
+function getNames(): string[] {
+    return Array.from(list.querySelectorAll(".name-text"))
+        .map((element) => element.textContent?.trim() || "")
+        .filter((name) => name.length > 0);
 }
+
+function getSegmentCount(): number {
+    return getNames().length;
+}
+
+
 
 function clearWheel(): void {
     if (!wheelElement) return;
@@ -35,7 +54,7 @@ function getPointOnCircle(center: Point, radius: number, angleRadians: number): 
     };
 }
 
-function createWheelSegmentPath(segmentIndex: number, segmentCount: number): SVGPathElement {
+function createWheelSegmentPath(segmentIndex: number, segmentCount: number, color: string): SVGPathElement {
     const angleStep: number = FULL_CIRCLE_RADIANS / segmentCount;
     const startAngle: number = segmentIndex * angleStep;
     const endAngle: number = (segmentIndex + 1) * angleStep;
@@ -49,17 +68,18 @@ function createWheelSegmentPath(segmentIndex: number, segmentCount: number): SVG
         "d",
         `M ${WHEEL_CENTER.x} ${WHEEL_CENTER.y} L ${startPoint.x} ${startPoint.y} A ${WHEEL_RADIUS} ${WHEEL_RADIUS} 0 ${largeArcFlag} 1 ${endPoint.x} ${endPoint.y} Z`
     );
-    path.setAttribute("fill", `hsl(${(segmentIndex * 360) / segmentCount}, 100%, 50%)`);
+    path.setAttribute("fill", color);
+    path.setAttribute("stroke", "black");
+    path.setAttribute("stroke-width", "1");
+
     return path;
 }
 
 function generateWheel(): void {
-    const segmentCount = getSegmentCount();
-    if (segmentCount < 2 || !wheelElement) return;
+    const names = getNames();
+    const segmentCount = names.length;
 
-    if (segmentCount === 8) {
-        window.open("https://www.instagram.com/reel/CwxOa6ruvJE/", "_blank");
-    }
+    if (segmentCount < 2 || !wheelElement) return;
 
     clearWheel();
 
@@ -157,13 +177,7 @@ function resetWheelRotation(): void {
     updateWheelRotation();
 }
 
-const MIN_ITEMS: number = 2;
 
-const input = document.getElementById("nameInput") as HTMLInputElement;
-const addBtn = document.getElementById("addBtn") as HTMLButtonElement;
-const list = document.getElementById("nameList") as HTMLUListElement;
-const errorHint = document.getElementById("errorHint") as HTMLParagraphElement;
-const emptyHint = document.getElementById("emptyHint") as HTMLParagraphElement;
 
 function getItemCount(): number {
     return list.querySelectorAll(".name-item").length;
@@ -191,7 +205,7 @@ function showError(): void {
 function handleRemove(item: HTMLLIElement): void {
     if (getItemCount() <= MIN_ITEMS) {
         item.classList.remove("shake");
-        void item.offsetWidth; // reflow
+        void item.offsetWidth;
         item.classList.add("shake");
         item.addEventListener("animationend", () => item.classList.remove("shake"), { once: true });
         showError();
@@ -227,7 +241,6 @@ function addName(rawName: string): void {
     input.focus();
 }
 
-// Bootstrap existing items
 list.querySelectorAll<HTMLLIElement>(".name-item").forEach((item) => {
     const btn = item.querySelector<HTMLButtonElement>(".btn-remove");
     if (btn) attachRemoveListener(btn, item);
