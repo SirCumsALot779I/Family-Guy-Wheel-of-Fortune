@@ -80,7 +80,7 @@ function playTickSound(): void {
     tickSound.play();
 }
 
-function spinWheel(totalSpinSteps: number): void {
+function spinWheel(totalSpinSteps: number, direction: "left" | "right"): void {
     const segmentCount = getSegmentCount();
     if (segmentCount < 2) return;
 
@@ -88,7 +88,7 @@ function spinWheel(totalSpinSteps: number): void {
     let completedSteps: number = 0;
 
     function performSpinStep(): void {
-        currentRotation -= 1;
+        currentRotation += direction === "right" ? 1 : -1;
         updateWheelRotation();
         completedSteps += 1;
 
@@ -103,19 +103,19 @@ function spinWheel(totalSpinSteps: number): void {
 
         const progress: number = completedSteps / totalSpinSteps;
         const delay: number =
-            SPIN_START_DELAY + (SPIN_END_DELAY - SPIN_START_DELAY) * (progress ** 2);
+            SPIN_START_DELAY + (SPIN_END_DELAY - SPIN_START_DELAY) * (progress ** 3);
 
         setTimeout(performSpinStep, delay);
     }
 
     performSpinStep();
 }
-
-(window as any).getRandomNumber = getRandomNumber;
+(window as any).getRandomNumber = getRandomNumber_left;
+(window as any).getRandomNumber = getRandomNumber_right;
 (window as any).generateWheel = generateWheel;
 (window as any).resetWheelRotation = resetWheelRotation;
 
-async function getRandomNumber(): Promise<void> {
+async function getRandomNumber_left(): Promise<void> {
     try {
         const response = await fetch("/api/random");
 
@@ -127,7 +127,25 @@ async function getRandomNumber(): Promise<void> {
 
         console.log("Number from se server:", data.ranNum);
 
-        spinWheel(data.ranNum);
+        spinWheel(data.ranNum, "right");
+    } catch (error) {
+        console.error("error whilst getting random value:", error);
+    }
+}
+
+async function getRandomNumber_right(): Promise<void> {
+    try {
+        const response = await fetch("/api/random");
+
+        if (!response.ok) {
+            throw new Error("Server response not ok.");
+        }
+
+        const data: { ranNum: number } = await response.json();
+
+        console.log("Number from se server:", data.ranNum);
+
+        spinWheel(data.ranNum, "left");
     } catch (error) {
         console.error("error whilst getting random value:", error);
     }
