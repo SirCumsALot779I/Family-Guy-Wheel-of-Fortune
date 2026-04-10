@@ -248,6 +248,8 @@ async function getRandomNumber_left(): Promise<void> {
         console.log("Number from se server:", data.ranNum);
 
         spinWheel(data.ranNum, "right");
+
+        disableSpinButtons();
     } catch (error) {
         console.error("error whilst getting random value:", error);
     }
@@ -266,6 +268,8 @@ async function getRandomNumber_right(): Promise<void> {
         console.log("Number from se server:", data.ranNum);
 
         spinWheel(data.ranNum, "left");
+
+        disableSpinButtons();
     } catch (error) {
         console.error("error whilst getting random value:", error);
     }
@@ -276,10 +280,53 @@ function resetWheelRotation(): void {
     currentRotation = 0;
     lastTickRotation = 0;
     updateWheelRotation();
+    enableSpinButtons();
+}
+
+function disableSpinButtons() {
+    const leftBtn = document.getElementById("spin-left-btn") as HTMLButtonElement | null;
+    const rightBtn = document.getElementById("spin-right-btn") as HTMLButtonElement | null;
+    if (leftBtn) {
+        leftBtn.disabled = true;
+        leftBtn?.style.setProperty("opacity", "0.5");
+        leftBtn?.style.setProperty("cursor", "not-allowed");
+        leftBtn?.style.setProperty("pointer-events", "none");
+        leftBtn?.style.setProperty("hover", "none");
+        leftBtn?.style.setProperty("active", "none");
+    }
+    if (rightBtn) {
+        rightBtn.disabled = true;
+        rightBtn?.style.setProperty("opacity", "0.5");
+        rightBtn?.style.setProperty("cursor", "not-allowed");
+        rightBtn?.style.setProperty("pointer-events", "none");
+        rightBtn?.style.setProperty("hover", "none");
+        rightBtn?.style.setProperty("active", "none");        
+    }
+}
+
+function enableSpinButtons() {
+    const leftBtn = document.getElementById("spin-left-btn") as HTMLButtonElement | null;
+    const rightBtn = document.getElementById("spin-right-btn") as HTMLButtonElement | null;
+    if (leftBtn) {
+        leftBtn.disabled = false;
+        leftBtn?.style.removeProperty("opacity");
+        leftBtn?.style.removeProperty("cursor");
+        leftBtn?.style.removeProperty("pointer-events");
+        leftBtn?.style.removeProperty("hover");
+        leftBtn?.style.removeProperty("active");
+    }
+    if (rightBtn) {
+        rightBtn.disabled = false;
+        rightBtn?.style.removeProperty("opacity");
+        rightBtn?.style.removeProperty("cursor");
+        rightBtn?.style.removeProperty("pointer-events");
+        rightBtn?.style.removeProperty("hover");
+        rightBtn?.style.removeProperty("active");        
+    }   
 }
 
 
-
+// Helferfunktionen für die Namensliste
 function getItemCount(): number {
     return list.querySelectorAll(".name-item").length;
 }
