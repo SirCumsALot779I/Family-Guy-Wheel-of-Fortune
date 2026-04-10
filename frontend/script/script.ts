@@ -183,7 +183,21 @@ function spinWheel(totalSpinSteps: number, direction: "left" | "right"): void {
         const progress: number = completedSteps / totalSpinSteps;
         const delay: number =
             SPIN_START_DELAY + (SPIN_END_DELAY - SPIN_START_DELAY) * (progress ** 4);
-        
+/*
+        function playDrumRoll();
+            // IF delay >= 200 play
+            function playTickSound(): void {
+                if (!tickSoundTemplate) return;
+                const tickSound = tickSoundTemplate.cloneNode(true) as HTMLAudioElement;
+                tickSound.play();
+            }
+    
+        function stopDrumRoll();
+
+            if (completedSteps >= totalSpinSteps) {
+                //stop drumroll;
+        }
+*/
         setTimeout(performSpinStep, delay);
     }
 
