@@ -183,35 +183,23 @@ function displayWinner(index) {
         return;
     winnerElement.textContent = `Gewinner: Segment ${index + 1}`;
 }
-async function getRandomNumber_left() {
-    try {
-        const response = await fetch("/api/random");
+function spinWheelWithRandomSteps(direction) {
+    const apiEndpoint = direction === "left" ? "/api/random" : "/api/random";
+    fetch(apiEndpoint)
+        .then((response) => {
         if (!response.ok) {
             throw new Error("Server response not ok.");
         }
-        const data = await response.json();
-        console.log("Number from se server:", data.ranNum);
-        spinWheel(data.ranNum, "right");
+        return response.json();
+    })
+        .then((data) => {
+        console.log("Number from server:", data.ranNum);
+        spinWheel(data.ranNum, direction);
         disableSpinButtons();
-    }
-    catch (error) {
-        console.error("error whilst getting random value:", error);
-    }
-}
-async function getRandomNumber_right() {
-    try {
-        const response = await fetch("/api/random");
-        if (!response.ok) {
-            throw new Error("Server response not ok.");
-        }
-        const data = await response.json();
-        console.log("Number from se server:", data.ranNum);
-        spinWheel(data.ranNum, "left");
-        disableSpinButtons();
-    }
-    catch (error) {
-        console.error("error whilst getting random value:", error);
-    }
+    })
+        .catch((error) => {
+        console.error("Error while getting random value:", error);
+    });
 }
 function resetWheelRotation() {
     spinCancelled = true;
@@ -323,6 +311,12 @@ input.addEventListener("keydown", (e) => {
         addName(input.value);
     }
 });
+function getRandomNumber_left() {
+    spinWheelWithRandomSteps("left");
+}
+function getRandomNumber_right() {
+    spinWheelWithRandomSteps("right");
+}
 window.getRandomNumber_left = getRandomNumber_left;
 window.getRandomNumber_right = getRandomNumber_right;
 window.generateWheel = generateWheel;

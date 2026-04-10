@@ -235,44 +235,24 @@ function displayWinner(index: number): void {
     winnerElement.textContent = `Gewinner: Segment ${index + 1}`;
 }
 
-async function getRandomNumber_left(): Promise<void> {
-    try {
-        const response = await fetch("/api/random");
+function spinWheelWithRandomSteps(direction: "left" | "right"): void {
+    const apiEndpoint = direction === "left" ? "/api/random" : "/api/random";
 
-        if (!response.ok) {
-            throw new Error("Server response not ok.");
-        }
-
-        const data: { ranNum: number } = await response.json();
-
-        console.log("Number from se server:", data.ranNum);
-
-        spinWheel(data.ranNum, "right");
-
-        disableSpinButtons();
-    } catch (error) {
-        console.error("error whilst getting random value:", error);
-    }
-}
-
-async function getRandomNumber_right(): Promise<void> {
-    try {
-        const response = await fetch("/api/random");
-
-        if (!response.ok) {
-            throw new Error("Server response not ok.");
-        }
-
-        const data: { ranNum: number } = await response.json();
-
-        console.log("Number from se server:", data.ranNum);
-
-        spinWheel(data.ranNum, "left");
-
-        disableSpinButtons();
-    } catch (error) {
-        console.error("error whilst getting random value:", error);
-    }
+    fetch(apiEndpoint)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Server response not ok.");
+            }
+            return response.json();
+        })
+        .then((data: { ranNum: number }) => {
+            console.log("Number from server:", data.ranNum);
+            spinWheel(data.ranNum, direction);
+            disableSpinButtons();
+        })
+        .catch((error) => {
+            console.error("Error while getting random value:", error);
+        });
 }
 
 function resetWheelRotation(): void {
@@ -396,6 +376,14 @@ input.addEventListener("keydown", (e: KeyboardEvent) => {
         addName(input.value);
         }
 });
+
+function getRandomNumber_left() {
+    spinWheelWithRandomSteps("left");
+}
+
+function getRandomNumber_right() {
+    spinWheelWithRandomSteps("right");
+}
 
 (window as any).getRandomNumber_left = getRandomNumber_left;
 (window as any).getRandomNumber_right = getRandomNumber_right;
