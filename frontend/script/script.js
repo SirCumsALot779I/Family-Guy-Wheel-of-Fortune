@@ -225,19 +225,15 @@ function disableSpinButtons() {
     const rightBtn = document.getElementById("spin-right-btn");
     if (leftBtn) {
         leftBtn.disabled = true;
-        leftBtn?.style.setProperty("opacity", "0.5");
-        leftBtn?.style.setProperty("cursor", "not-allowed");
-        leftBtn?.style.setProperty("pointer-events", "none");
-        leftBtn?.style.setProperty("hover", "none");
-        leftBtn?.style.setProperty("active", "none");
+        leftBtn.style.setProperty("opacity", "0.5");
+        leftBtn.style.setProperty("cursor", "not-allowed");
+        leftBtn.style.setProperty("pointer-events", "none");
     }
     if (rightBtn) {
         rightBtn.disabled = true;
-        rightBtn?.style.setProperty("opacity", "0.5");
-        rightBtn?.style.setProperty("cursor", "not-allowed");
-        rightBtn?.style.setProperty("pointer-events", "none");
-        rightBtn?.style.setProperty("hover", "none");
-        rightBtn?.style.setProperty("active", "none");
+        rightBtn.style.setProperty("opacity", "0.5");
+        rightBtn.style.setProperty("cursor", "not-allowed");
+        rightBtn.style.setProperty("pointer-events", "none");
     }
 }
 function enableSpinButtons() {
@@ -245,19 +241,15 @@ function enableSpinButtons() {
     const rightBtn = document.getElementById("spin-right-btn");
     if (leftBtn) {
         leftBtn.disabled = false;
-        leftBtn?.style.removeProperty("opacity");
-        leftBtn?.style.removeProperty("cursor");
-        leftBtn?.style.removeProperty("pointer-events");
-        leftBtn?.style.removeProperty("hover");
-        leftBtn?.style.removeProperty("active");
+        leftBtn.style.removeProperty("opacity");
+        leftBtn.style.removeProperty("cursor");
+        leftBtn.style.removeProperty("pointer-events");
     }
     if (rightBtn) {
         rightBtn.disabled = false;
-        rightBtn?.style.removeProperty("opacity");
-        rightBtn?.style.removeProperty("cursor");
-        rightBtn?.style.removeProperty("pointer-events");
-        rightBtn?.style.removeProperty("hover");
-        rightBtn?.style.removeProperty("active");
+        rightBtn.style.removeProperty("opacity");
+        rightBtn.style.removeProperty("cursor");
+        rightBtn.style.removeProperty("pointer-events");
     }
 }
 // Helferfunktionen für die Namensliste
