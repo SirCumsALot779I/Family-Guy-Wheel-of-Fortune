@@ -76,11 +76,16 @@ function spinWheel(totalSpinSteps: number, direction: "left" | "right"): void {
     currentRotation += direction === "right" ? 1 : -1;
     updateWheelRotation();
     completedSteps += 1;
-
-    if (Math.abs(currentRotation - lastTickRotation) >= stepAngle) {
+    
+    const halfStep = stepAngle / 2;
+    const previousSegmentIndex = Math.floor((((lastTickRotation + halfStep) % 360) + 360) % 360 / stepAngle);
+    const currentSegmentIndex = Math.floor((((currentRotation + halfStep) % 360) + 360) % 360 / stepAngle);
+    
+    if (previousSegmentIndex !== currentSegmentIndex) {
       playTickSound();
-      lastTickRotation = currentRotation;
     }
+
+    lastTickRotation = currentRotation;
 
     if (completedSteps >= totalSpinSteps) {
         stopDrumRoll();
