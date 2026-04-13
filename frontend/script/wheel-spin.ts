@@ -1,5 +1,5 @@
 import { SPIN_START_DELAY, SPIN_END_DELAY } from "./constants.js";
-import { wheelElement } from "./dom.js";
+import { wheelElement, input, addBtn, spinLeftBtn, spinRightBtn, multiplierValue, multiplierSlider } from "./dom.js";
 import { playTickSound, playDrumRoll, stopDrumRoll } from "./sound.js";
 import { fetchRandomNumber } from "./api.js";
 import { getSegmentCount, getNames } from "./name-list.js";
@@ -36,12 +36,7 @@ function resetDisplayWinner(): void {
 
 
 function getSpinRelatedElements(): (HTMLButtonElement | HTMLInputElement | null)[] {
-  return [
-    document.getElementById("spin-left-btn") as HTMLButtonElement | null,
-    document.getElementById("spin-right-btn") as HTMLButtonElement | null,
-    document.getElementById("addBtn") as HTMLButtonElement | null,
-    document.getElementById("nameInput") as HTMLInputElement | null,
-  ];
+  return [ input, addBtn, spinLeftBtn, spinRightBtn ];
 }
 
 function disableElements(elements: (HTMLButtonElement | HTMLInputElement | null)[]): void {
@@ -114,7 +109,14 @@ function spinWheel(totalSpinSteps: number, direction: "left" | "right"): void {
 export function spinWheelWithRandomSteps(direction: "left" | "right"): void {
   fetchRandomNumber()
     .then((ranNum) => {
-      console.log("Number from server:", ranNum);      spinWheel(ranNum, direction);
+      const multiplier = getMultiplier();
+      const boostedRanNum = ranNum * multiplier;
+
+      console.log("Number from fs server:", ranNum);
+      console.log("Multiplier:", multiplier);
+      console.log("Boosted value:", boostedRanNum);
+
+      spinWheel(boostedRanNum, direction);
       disableElements(getSpinRelatedElements());
     })
     .catch((error) => {
@@ -125,8 +127,24 @@ export function spinWheelWithRandomSteps(direction: "left" | "right"): void {
 export function resetWheelRotation(): void {
     spinCancelled = true;
     currentRotation = 0;
-    lastTickRotation = 0;    updateWheelRotation();
+    lastTickRotation = 0;    
+    updateWheelRotation();
     enableElements(getSpinRelatedElements());
     stopDrumRoll();
     resetDisplayWinner();
+}
+
+export function updateMultiplierDisplay(): void {
+    if (!multiplierSlider || !multiplierValue) return;
+    multiplierValue.textContent = multiplierSlider.value;
+}
+
+multiplierSlider?.addEventListener("input", updateMultiplierDisplay);
+updateMultiplierDisplay();
+
+export function getMultiplier(): number {
+    if (!multiplierSlider) return 1;
+
+    const value = parseFloat(multiplierSlider.value);
+    return Number.isNaN(value) ? 1 : value;
 }

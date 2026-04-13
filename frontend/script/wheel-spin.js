@@ -1,5 +1,5 @@
 import { SPIN_START_DELAY, SPIN_END_DELAY } from "./constants.js";
-import { wheelElement } from "./dom.js";
+import { wheelElement, input, addBtn, spinLeftBtn, spinRightBtn, multiplierValue, multiplierSlider } from "./dom.js";
 import { playTickSound, playDrumRoll, stopDrumRoll } from "./sound.js";
 import { fetchRandomNumber } from "./api.js";
 import { getSegmentCount, getNames } from "./name-list.js";
@@ -30,12 +30,7 @@ function resetDisplayWinner() {
     winnerElement.textContent = "Winner: No result yet";
 }
 function getSpinRelatedElements() {
-    return [
-        document.getElementById("spin-left-btn"),
-        document.getElementById("spin-right-btn"),
-        document.getElementById("addBtn"),
-        document.getElementById("nameInput"),
-    ];
+    return [input, addBtn, spinLeftBtn, spinRightBtn];
 }
 function disableElements(elements) {
     elements.forEach((element) => {
@@ -94,8 +89,12 @@ function spinWheel(totalSpinSteps, direction) {
 export function spinWheelWithRandomSteps(direction) {
     fetchRandomNumber()
         .then((ranNum) => {
-        console.log("Number from server:", ranNum);
-        spinWheel(ranNum, direction);
+        const multiplier = getMultiplier();
+        const boostedRanNum = ranNum * multiplier;
+        console.log("Number from fs server:", ranNum);
+        console.log("Multiplier:", multiplier);
+        console.log("Boosted value:", boostedRanNum);
+        spinWheel(boostedRanNum, direction);
         disableElements(getSpinRelatedElements());
     })
         .catch((error) => {
@@ -110,4 +109,17 @@ export function resetWheelRotation() {
     enableElements(getSpinRelatedElements());
     stopDrumRoll();
     resetDisplayWinner();
+}
+export function updateMultiplierDisplay() {
+    if (!multiplierSlider || !multiplierValue)
+        return;
+    multiplierValue.textContent = multiplierSlider.value;
+}
+multiplierSlider?.addEventListener("input", updateMultiplierDisplay);
+updateMultiplierDisplay();
+export function getMultiplier() {
+    if (!multiplierSlider)
+        return 1;
+    const value = parseFloat(multiplierSlider.value);
+    return Number.isNaN(value) ? 1 : value;
 }

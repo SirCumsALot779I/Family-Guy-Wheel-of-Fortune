@@ -20,6 +20,12 @@
         <svg id="svg" width="700" height="700" viewBox="0 0 300 300">
             <g id="wheel"></g>
         </svg>
+        <div class="multiplier-container">
+            <label for="multiplierSlider">
+                Power: <span id="multiplierValue">1</span>x
+            </label>
+            <input type="range" id="multiplierSlider" min="1" max="2" step="0.1" value="1">
+        </div>
         <div class="panel">
             <div class="add-row">
                 <input type="text" id="nameInput" placeholder="Enter name …" />
