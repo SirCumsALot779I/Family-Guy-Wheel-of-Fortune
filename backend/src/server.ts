@@ -6,10 +6,10 @@ const PORT = 3000;
 const MAX_ROTATIONS = 5;
 const FULL_CIRCLE = 360;
 const MIN_ROTATIONAL_DEGREE = 1
-// Pfad zum Frontend
+// Path to frontend
 const frontendPath = path.join(__dirname, "../../frontend");
 
-// Statische Dateien 
+// Static files 
 app.use(express.static(frontendPath));
 
 //  API
@@ -20,11 +20,11 @@ app.get("/api/random", (req, res) => {
 });
  
  
-// Fallback: index.html laden
+// Fallback: serve index.html
 app.get("*", (req, res) => {
     res.sendFile(path.join(frontendPath, "index.html"));
 });
 
 app.listen(PORT, () => {
-    console.log(`Server läuft auf http://localhost:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
 });
