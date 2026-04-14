@@ -2,10 +2,11 @@ import { SPIN_START_DELAY, SPIN_END_DELAY } from "./constants.js";
 import { wheelElement, input, addBtn, spinLeftBtn, spinRightBtn, multiplierValue, multiplierSlider } from "./dom.js";
 import { playTickSound, playDrumRoll, stopDrumRoll } from "./sound.js";
 import { fetchRandomNumber } from "./api.js";
-import { getSegmentCount, getNames } from "./name-list.js";
+import { getSegmentCount } from "./name-list.js";
+import { announceWinner, resetDisplayWinner } from "./winner.js";
 
 
-let currentRotation = 0;
+export let currentRotation = 0;
 let lastTickRotation = 0;
 let spinCancelled = false;
 
@@ -14,29 +15,11 @@ function updateWheelRotation(): void {
   wheelElement.style.transform = `rotate(${currentRotation}deg)`;
 }
 
-function getWinningSegmentIndex(segmentCount: number): number {
-  const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-  const stepAngle = 360 / segmentCount;
-  const adjustedRotation = (360 - normalizedRotation + 270) % 360;
-  return Math.floor(adjustedRotation / stepAngle) % segmentCount;
-}
 
-function displayWinner(winnerName: string): void {
-    const winnerElement = document.getElementById("winner");
-    if (!winnerElement) return;
-
-    winnerElement.textContent = `Winner: ${winnerName}`;
-}
-function resetDisplayWinner(): void {
-    const winnerElement = document.getElementById("winner");
-    if (!winnerElement) return;
-
-    winnerElement.textContent = "Winner: No result yet";
-}
 
 
 function getSpinRelatedElements(): (HTMLButtonElement | HTMLInputElement | null)[] {
-  return [ input, addBtn, spinLeftBtn, spinRightBtn ];
+  return [ input, addBtn, spinLeftBtn, spinRightBtn, multiplierSlider ];
 }
 
 function disableElements(elements: (HTMLButtonElement | HTMLInputElement | null)[]): void {
@@ -88,13 +71,7 @@ function spinWheel(totalSpinSteps: number, direction: "left" | "right"): void {
     lastTickRotation = currentRotation;
 
     if (completedSteps >= totalSpinSteps) {
-        stopDrumRoll();
-
-        const winnerIndex = getWinningSegmentIndex(segmentCount);
-        const names = getNames();
-        const winnerName = names[winnerIndex];
-
-        displayWinner(winnerName);
+        announceWinner(segmentCount);
         return;
     }
 

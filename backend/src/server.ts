@@ -5,7 +5,7 @@ import { getSecureRandomNumber } from "./utils/random";
 
 const app = express();
 const PORT = 3000;
-const MIN_ROTATION_DEGREE: number = 70;
+const MIN_ROTATION_DEGREE: number = 140;
 const MAX_ROTATION_DEGREE: number = 900;
 
 
