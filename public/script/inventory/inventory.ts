@@ -135,21 +135,42 @@ function createEmptyCard(): HTMLDivElement {
   return card;
 }
 
-function createItemCard(item: InventoryItem): HTMLElement {
-  const hasValidLink = (item.link ?? "").trim() !== "";
-  const card = hasValidLink
-    ? document.createElement("a")
-    : document.createElement("div");
+function hasValidLink(link: string | null): link is string {
+  return (link ?? "").trim() !== "";
+}
 
-  card.classList.add("inventory-card");
-
-  if (card instanceof HTMLAnchorElement) {
-    card.href = item.link!;
+function createCardContainer(item: InventoryItem): HTMLElement {
+  if (!hasValidLink(item.link)) {
+    const card = document.createElement("div");
+    card.classList.add("inventory-card");
+    return card;
   }
+
+  const card = document.createElement("a");
+  card.classList.add("inventory-card");
+  card.href = item.link;
+  return card;
+}
+
+function createDeleteButton(item: InventoryItem): HTMLButtonElement {
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "inventory-delete-btn";
+  deleteBtn.setAttribute("aria-label", "Eintrag loeschen");
+  deleteBtn.textContent = "🗑️";
+  deleteBtn.addEventListener("click", (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openDeleteModal(item.id, item.title);
+  });
+  return deleteBtn;
+}
+
+function createItemCard(item: InventoryItem): HTMLElement {
+  const card = createCardContainer(item);
 
   card.appendChild(buildCardContent(item));
 
-  if (hasValidLink) {
+  if (hasValidLink(item.link)) {
     card.appendChild(createDeleteButton(item));
   }
 
@@ -162,27 +183,15 @@ function buildCardContent(item: InventoryItem): HTMLDivElement {
 
   const names = extractNamesFromLink(item.link);
   if (names.length >= 2) {
-    content.appendChild(createMiniWheel(names, 65));
+    const miniWheel = createMiniWheel(names, 65);
+    content.appendChild(miniWheel);
   }
 
-  const heading = document.createElement("h3");
-  heading.textContent = item.title;
-  content.appendChild(heading);
+  const title = document.createElement("h3");
+  title.textContent = item.title;
+  content.appendChild(title);
 
   return content;
-}
-
-function createDeleteButton(item: InventoryItem): HTMLButtonElement {
-  const btn = document.createElement("button");
-  btn.className = "inventory-delete-btn";
-  btn.setAttribute("aria-label", "Eintrag löschen");
-  btn.textContent = "🗑️";
-  btn.addEventListener("click", (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openDeleteModal(item.id, item.title);
-  });
-  return btn;
 }
 
 async function fetchInventoryItems(): Promise<InventoryItem[]> {
