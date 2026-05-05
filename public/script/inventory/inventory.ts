@@ -1,9 +1,10 @@
-import { FULL_CIRCLE_RADIANS, INVENTORY_LIMIT, SVG_NS, MINI_CENTER, MINI_RADIUS } from "../shared/constants.js";
+import { INVENTORY_LIMIT } from "../shared/constants.js";
 import {
   addItemModal,
   addItemInput,
   cancelAddItemBtn,
   closeAddItemBtn,
+  closeOnBackdropClick,
   confirmAddItemBtn,
   confirmDeleteBtn,
   confirmDeleteModal,
@@ -14,26 +15,12 @@ import {
   inventoryModal,
   cancelDeleteBtn
 } from "../shared/dom.js";
-import { supabaseClient } from "../shared/supabase-client.js";
+import { supabaseClient, fetchCurrentUser } from "../shared/supabase-client.js";
 import { generateShareLink } from "../names/share-name-list.js";
 import { InventoryItem } from "../shared/types.js";
-import { getSegmentColor, getPointOnCircle } from "../wheel/renderer.js";
+import { extractNamesFromLink, createMiniWheel } from "../wheel/mini-wheel.js";
 
 let pendingDeleteId: string | null = null;
-
-async function fetchCurrentUser() {
-  const {
-    data: { user },
-    error,
-  } = await supabaseClient.auth.getUser();
-
-  if (error) {
-    console.error("Fehler beim Laden des Users:", error.message);
-    return null;
-  }
-
-  return user;
-}
 
 function openDeleteModal(id: string, title: string): void {
   pendingDeleteId = id;
@@ -59,14 +46,6 @@ async function confirmDelete(): Promise<void> {
 function cancelDelete(): void {
   confirmDeleteModal.close();
   pendingDeleteId = null;
-}
-
-function closeOnBackdropClick(modal: HTMLDialogElement, onClose?: () => void): void {
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      onClose ? onClose() : modal.close();
-    }
-  });
 }
 
 async function deleteItem(id: string): Promise<boolean> {
@@ -274,61 +253,4 @@ export function initInventory(): void {
   closeOnBackdropClick(confirmDeleteModal, cancelDelete);
 }
 
-function extractNamesFromLink(link: string | null): string[] {
-  if (!link) return [];
 
-  try {
-    const namesParam = new URL(link).searchParams.get("names");
-    if (!namesParam) return [];
-
-    const names = JSON.parse(decodeURIComponent(namesParam));
-    return Array.isArray(names)
-      ? names.filter((n) => typeof n === "string" && n.trim())
-      : [];
-  } catch {
-    return [];
-  }
-}
-
-function createMiniSegment(index: number, count: number): SVGPathElement {
-  const angleStep = FULL_CIRCLE_RADIANS / count;
-  const start = index * angleStep;
-  const end = (index + 1) * angleStep;
-
-  const p1 = getPointOnCircle(MINI_CENTER, MINI_RADIUS, start);
-  const p2 = getPointOnCircle(MINI_CENTER, MINI_RADIUS, end);
-
-  const largeArc = angleStep > Math.PI ? 1 : 0;
-
-  const path = document.createElementNS(SVG_NS, "path");
-
-  path.setAttribute(
-    "d",
-    `M ${MINI_CENTER.x} ${MINI_CENTER.y}
-     L ${p1.x} ${p1.y}
-     A ${MINI_RADIUS} ${MINI_RADIUS} 0 ${largeArc} 1 ${p2.x} ${p2.y}
-     Z`
-  );
-
-  path.setAttribute("fill", getSegmentColor(index));
-  path.setAttribute("stroke", "black");
-  path.setAttribute("stroke-width", "0.5");
-
-  return path;
-}
-
-function createMiniWheel(names: string[], size = 70): SVGSVGElement {
-  const svg = document.createElementNS(SVG_NS, "svg");
-
-  svg.setAttribute("width", String(size));
-  svg.setAttribute("height", String(size));
-  svg.setAttribute("viewBox", "0 0 200 200");
-
-  if (names.length < 2) return svg;
-
-  names.forEach((_, i) => {
-    svg.appendChild(createMiniSegment(i, names.length));
-  });
-
-  return svg;
-}
