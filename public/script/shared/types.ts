@@ -55,7 +55,7 @@ export interface Asset {
 }
 
 export interface ShopData {
-  asset: Asset[];
+  assets: Asset[];
   userCoins: number;
 }
 

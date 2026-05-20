@@ -9,7 +9,7 @@ function getOrCreateToastContainer(): HTMLDivElement {
 
   const container = document.createElement("div");
   container.id = "toast-container";
-  container.setAttribute("popover", "manual"); 
+  container.setAttribute("popover", "manual");
   document.body.appendChild(container);
   container.showPopover();
   return container;
@@ -44,7 +44,7 @@ function dismissToast(toast: HTMLDivElement): void {
 export function showToast({ message, type, durationMs = toastDurationMs }: ToastOptions): void {
   const container = getOrCreateToastContainer();
   const toast = createToastElement(message, type);
-  
+
   container.appendChild(toast);
   requestAnimationFrame(() => toast.classList.add("toast--visible"));
 
